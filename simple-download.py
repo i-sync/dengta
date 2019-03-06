@@ -4,16 +4,24 @@ import requests
 import json
 import os
 import time
+import sys, getopt
 
 
 class Downloader():
-    
-    def download_file(self, url):
+    def get_json_data(self, course_id):
         headers = { 
-            "Referer": "http://dengta-t-4.61info.cn/wx/groupBuy/sectionContent.html?courseId=25&sectionId=1&openId=oOcXl0a37tf8lNhqCnbHi16p6A0A&channel=54&prePageName=sectionList",
-            "Accept-Encoding": "",
             "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36",
-            "Range":"bytes=0-"
+            "Cookie": "groupBuy_openId_new=oOcXl0a37tf8lNhqCnbHi16p6A0A; openId=oOcXl0a37tf8lNhqCnbHi16p6A0A; Hm_lvt_aca440f4172ea5b39ae32a3daeac7fba=1551065588,1551087508; groupBuy_posterOpenId_new=natureSubPoster; Hm_lpvt_aca440f4172ea5b39ae32a3daeac7fba=1551110811; JSESSIONID=53ABDA93D608A055DE0B9B19E5FE92E0"
+        }
+        base_url = "http://dengta-t-4.61info.cn/wx/groupBuy/getSectionList.json?courseId={}"
+        if course_id is None:
+            return None
+        res = requests.get(base_url.format(course_id), headers = headers)
+        return res.json()
+
+    def download_file(self, url):
+        headers = {
+            "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36"
         }
         base_url = "http://media6.61info.cn/groupbuy/{}"
         if url is None:
@@ -28,30 +36,56 @@ class Downloader():
         with open(file_name, 'wb') as f:
             f.write(file_content)
 
+    '''
     def get_json_data(self, file_path):
         if not os.path.exists(file_path):
             return []
         with open(file_path, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
         return json_data
+    '''
 
+def get_argv(argv):
+    start = 0
+    end = 0
+    try:
+        opts, args = getopt.getopt(argv,"hs:e:n:",["start=","end=","num="])
+    except getopt.GetoptError:
+      print('simple-download.py -s <start course id> -e <end course id> -n <single course id num>')
+      sys.exit(2)
+    for opt, arg in opts:
+      if opt == '-h':
+         print('simple-download.py -s <start course id> -e <end course id> -n <single course id num>')
+         sys.exit()
+      elif opt in ("-s", "--start"):
+         start = arg
+      elif opt in ("-e", "--end"):
+         end = arg
+      elif opt in ("-n", "--num"):
+         start = end = arg
+    if start == 0 or end == 0:
+        print('Error!, start course id or end course id incorrect')
+        sys.exit()
+    return int(start), int(end)
 
 if __name__ == "__main__":
+    start, end = get_argv(sys.argv[1:])
+    #print(start, end, type(start))
     base_path = "/mnt/files"
     downloader = Downloader()
-    data_file = "content.json"
-    json_data = downloader.get_json_data(data_file)
-    for key in json_data:
-        course_file = "json/{}.json".format(key)
-        course_name = "{}.{}".format(key, json_data[key])
-        print(course_file, course_name)
-        course_data = downloader.get_json_data(course_file)
-        for data in course_data:
+    for course_id in range(start, end + 1):
+        json_data = downloader.get_json_data(course_id)
+        #check if success
+        if not json_data["resultCode"]["success"]:
+            continue
+        seasonlist = json_data["value"]["allSeasonSectionList"][0]
+        course_name = "{}.{}".format(course_id, seasonlist["courseInfo"]["courseName"])
+        for data in seasonlist["sectionList"]:
             file_url = data["videoUrl"]
             if "?" in file_url:
                 file_ext = file_url[file_url.index("."): file_url.index("?")]
             else:
-                file_ext = file_url[file_url.index("."): -1]
+                file_ext = file_url[file_url.index("."):]
             file_path = "{}/{}".format(base_path, course_name)
             #check file_path, if not exists , create.
             if not os.path.exists(file_path):
