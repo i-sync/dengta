@@ -5,7 +5,7 @@ import json
 import os
 import time
 import sys, getopt
-
+m3u8_download = __import__("m3u8-download")
 
 class Downloader():
     def get_json_data(self, course_id):
@@ -90,11 +90,16 @@ if __name__ == "__main__":
             #check file_path, if not exists , create.
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
-            file_name = "{}/{}{}".format(file_path, data["title"], file_ext) 
+            file_name = "{}/{}{}".format(file_path, data["title"], ".mp4" if file_ext == ".m3u8" else file_ext) 
             print(file_name)
             #check file_name, if exists continue.
             if os.path.exists(file_name):
                 print(file_name, "exists, skip...")
+                continue
+
+            #check file_ext if equal m3u8
+            if file_ext == ".m3u8":
+                #m3u8_download.m3u8_downloader(data["userVideoUrl"], data["title"], file_path).download()
                 continue
             #file_content = downloader.download_file(file_url)
             #downloader.write_file(file_name, file_content)
