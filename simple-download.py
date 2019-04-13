@@ -28,6 +28,8 @@ class Downloader():
             return url
             
         res = requests.get(base_url.format(url), headers = headers)
+        if res.status_code != requests.codes.ok:
+            return None
         return res.content
         
     def write_file(self, file_name, file_content):
@@ -101,9 +103,13 @@ if __name__ == "__main__":
             if file_ext == ".m3u8":
                 #m3u8_download.m3u8_downloader(data["userVideoUrl"], data["title"], file_path).download()
                 continue
-            #file_content = downloader.download_file(file_url)
-            #downloader.write_file(file_name, file_content)
-            #time.sleep(2)
+            file_content = downloader.download_file(file_url)
+            #check if download success
+            if file_content is None:
+                print(file_name, "download failed...")
+            else:
+                downloader.write_file(file_name, file_content)
+            time.sleep(2)
             #break
         print(course_name, "....Done.")
         #break

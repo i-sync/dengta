@@ -80,7 +80,7 @@ class m3u8_downloader:
         total_num = len(self.ts_files)
         for index, (file_path, file_url)  in enumerate(self.ts_files.items()):
             #download percent start
-            sys.stdout.write('\r[{0:50}] {1}/{2}'.format('='*(index * 50 // total_num), index, total_num))
+            sys.stdout.write('\r[{0:50}] {1}/{2}'.format('='*((index+1) * 50 // total_num), (index+1), total_num))
             sys.stdout.flush()
             #download percent end
             
