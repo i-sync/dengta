@@ -6,6 +6,7 @@ import os
 import time
 import sys, getopt
 m3u8_download = __import__("m3u8-download")
+import subprocess
 
 class Downloader():
     def get_json_data(self, course_id):
@@ -13,7 +14,7 @@ class Downloader():
             "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.119 Safari/537.36",
             "Cookie": "groupBuy_openId_new=oOcXl0a37tf8lNhqCnbHi16p6A0A; openId=oOcXl0a37tf8lNhqCnbHi16p6A0A; Hm_lvt_aca440f4172ea5b39ae32a3daeac7fba=1551065588,1551087508; groupBuy_posterOpenId_new=natureSubPoster; Hm_lpvt_aca440f4172ea5b39ae32a3daeac7fba=1551110811; JSESSIONID=53ABDA93D608A055DE0B9B19E5FE92E0"
         }
-        base_url = "http://dengta-t-4.61info.cn/wx/groupBuy/getSectionList.json?courseId={}"
+        base_url = "http://dengta-t-6.61info.cn/wx/groupBuy/getSectionList.json?courseId={}"
         if course_id is None:
             return None
         res = requests.get(base_url.format(course_id), headers = headers)
@@ -102,6 +103,8 @@ if __name__ == "__main__":
             #check file_ext if equal m3u8
             if file_ext == ".m3u8":
                 #m3u8_download.m3u8_downloader(data["userVideoUrl"], data["title"], file_path).download()
+                #command = "ffmpeg -i '{}' {}{}.mp4".format(data["userVideoUrl"], file_path, data["title"])
+                subprocess.call(['ffmpeg', '-i', data["userVideoUrl"], '-vcodec', 'copy', '-acodec', 'copy', '{}/{}.mp4'.format(file_path, data["title"])])
                 continue
             file_content = downloader.download_file(file_url)
             #check if download success
