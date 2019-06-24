@@ -105,6 +105,7 @@ if __name__ == "__main__":
                 #m3u8_download.m3u8_downloader(data["userVideoUrl"], data["title"], file_path).download()
                 #command = "ffmpeg -i '{}' {}{}.mp4".format(data["userVideoUrl"], file_path, data["title"])
                 subprocess.call(['ffmpeg', '-i', data["userVideoUrl"], '-vcodec', 'copy', '-acodec', 'copy', '{}/{}.mp4'.format(file_path, data["title"])])
+                time.sleep(20)
                 continue
             file_content = downloader.download_file(file_url)
             #check if download success
@@ -112,7 +113,7 @@ if __name__ == "__main__":
                 print(file_name, "download failed...")
             else:
                 downloader.write_file(file_name, file_content)
-            time.sleep(2)
+            time.sleep(20)
             #break
         print(course_name, "....Done.")
         #break
