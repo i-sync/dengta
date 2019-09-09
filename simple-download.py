@@ -84,7 +84,7 @@ if __name__ == "__main__":
         seasonlist = json_data["value"]["allSeasonSectionList"][0]
         course_name = "{}.{}".format(course_id, seasonlist["courseInfo"]["courseName"])
         for data in seasonlist["sectionList"]:
-            file_url = data["videoUrl"]
+            file_url = data["videoUrlForApp"] if data["videoUrlForApp"] else data["videoUrl"]
             if "?" in file_url:
                 file_ext = file_url[file_url.index("."): file_url.index("?")]
             else:
