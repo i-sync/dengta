@@ -1,4 +1,5 @@
-files/*.mp4
+files/*/*.mp4
 __pycache__/
 .vscode/
+.idea/
 json/

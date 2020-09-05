@@ -9,6 +9,22 @@ m3u8_download = __import__("m3u8-download")
 import subprocess
 
 class Downloader():
+    def __init__(self):
+        self.headers = {
+            "accept": "*/*",
+            "Authorization": "sdfkjhaskdfh12459384",
+            "osType": "Android",
+            "appVersion": "1.8.3",
+            "appVersionCode": "10055",
+            "deviceId": "30c92de0647a3199",
+            "osVersion": "5.1.1",
+            "channelId": "hw",
+            "tourist": "0",
+            "pushType": "xinge",
+            "User-Agent": "okhttp/3.11.0"
+        }
+
+
     def get_json_data(self, course_id, force):
         json_file_name = f"{os.path.dirname(os.path.abspath(__file__))}/json/{course_id}.json"
         if force and os.path.exists(json_file_name):
@@ -17,14 +33,10 @@ class Downloader():
             with open(json_file_name, 'r', encoding='utf-8') as f:
                 return json.load(f)
 
-        headers = { 
-            "User-Agent":"Mozilla/5.0 (Linux; Android 10; MI 8 Build/QKQ1.190828.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.149 Mobile Safari/537.36 MMWEBID/6018 MicroMessenger/7.0.12.1601(0x27000C41) Process/tools NetType/WIFI Language/zh_CN ABI/arm64 GPVersion/1",
-            "Cookie": ""
-        }
-        base_url = f"http://wx-1.dengtacourse.com/dengta/course/{course_id}/section-list-info.json"
+        base_url = f"http://wx-1.dengtacourse.com/dengta/app/getSectionListNewV2.json?courseId={course_id}"
         if course_id is None:
             return None
-        res = requests.get(base_url, headers = headers)
+        res = requests.post(base_url, headers=self.headers)
         if res.status_code != requests.codes.ok:
             print(res.json())
             return res.json()
@@ -39,11 +51,11 @@ class Downloader():
         headers = {
             "User-Agent":"Mozilla/5.0 (Linux; Android 10; MI 8 Build/QKQ1.190828.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.149 Mobile Safari/537.36 MMWEBID/6018 MicroMessenger/7.0.12.1601(0x27000C41) Process/tools NetType/WIFI Language/zh_CN ABI/arm64 GPVersion/1"
         }
-        base_url = "http://mediadengta.61info.cn/groupbuy/{}"
+        #base_url = "http://mediadengta.61info.cn/groupbuy/{}"
         if url is None:
             return url
             
-        res = requests.get(base_url.format(url), headers = headers)
+        res = requests.get(url, headers=headers)
         if res.status_code != requests.codes.ok:
             return None
         return res.content
@@ -102,18 +114,18 @@ if __name__ == "__main__":
         #check if success
         if not json_data["resultCode"]["success"]:
             continue
-        seasonlist = json_data["value"]["allSeasonSectionList"][0]
-        course_name = "{}.{}".format(course_id, seasonlist["courseInfo"]["courseName"])
+        seasonlist = json_data["value"]
+        course_name = "{}.{}".format(course_id, seasonlist["courserName"])
         for data in seasonlist["sectionList"]:
-            file_url = data["videoUrlForApp"] if data["videoUrlForApp"] else data["userVideoUrl"]
+            file_url = data["videoUrl"]
 
             if file_url.endswith('NULL'):
                 print(f'{data["sectionId"]}.{data["title"]}, URL is: {file_url}')
                 continue
             if "?" in file_url:
-                file_ext = file_url[file_url.index("."): file_url.index("?")]
+                file_ext = file_url[file_url.rindex("."): file_url.index("?")]
             else:
-                file_ext = file_url[file_url.index("."):]
+                file_ext = file_url[file_url.rindex("."):]
             file_path = "{}/{}".format(base_path, course_name)
             #check file_path, if not exists , create.
             if not os.path.exists(file_path):
@@ -127,13 +139,6 @@ if __name__ == "__main__":
                 print(file_name, "exists, skip...")
                 continue
 
-            #check file_ext if equal m3u8
-            if file_ext == ".m3u8":
-                #m3u8_download.m3u8_downloader(data["userVideoUrl"], data["title"], file_path).download()
-                #command = "ffmpeg -i '{}' {}{}.mp4".format(data["userVideoUrl"], file_path, data["title"])
-                subprocess.call(['ffmpeg', '-i', data["userVideoUrl"], '-vcodec', 'copy', '-acodec', 'copy', '{}/{}.mp4'.format(file_path, data["title"])])
-                time.sleep(20)
-                continue
             file_content = downloader.download_file(file_url)
             #check if download success
             if file_content is None:
