@@ -130,7 +130,7 @@ if __name__ == "__main__":
             #check file_path, if not exists , create.
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
-            file_name = "{}/{}{}".format(file_path, data["title"], ".mp4" if file_ext == ".m3u8" else file_ext) 
+            file_name = "{}/{}{}".format(file_path, data["title"].replace('/', '-').strip(), ".mp4" if file_ext == ".m3u8" else file_ext)
             print(file_name)
             if p:
                 continue
