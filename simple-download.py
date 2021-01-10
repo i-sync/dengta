@@ -130,7 +130,7 @@ if __name__ == "__main__":
             #check file_path, if not exists , create.
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
-            index = f"{data["sectionId"]:0>2}" if len(seasonlist["sectionList"]) < 100 else f"{data["sectionId"]:0>3}"
+            index = f"{data['sectionId']:0>2}" if len(seasonlist["sectionList"]) < 100 else f"{data['sectionId']:0>3}"
             file_name = f"{file_path}/{index}.{data["title"].replace('/', '-').strip()}{".mp4" if file_ext == ".m3u8" else file_ext}"
             print(file_name)
             if p:
