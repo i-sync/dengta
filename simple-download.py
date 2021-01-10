@@ -80,14 +80,15 @@ def get_argv(argv):
     end = 0
     p = False
     force = False
+    index = False
     try:
-        opts, args = getopt.getopt(argv,"hs:e:n:pf",["start=","end=","num=","print", "force"])
+        opts, args = getopt.getopt(argv,"hs:e:n:pf",["start=","end=","num=","print", "force", "index"])
     except getopt.GetoptError:
-      print('simple-download.py -s <start course id> -e <end course id> -n <single course id num> -p <only print>')
+      print('simple-download.py -s <start course id> -e <end course id> -n <single course id num> -p <only print> -f <forece update jsondata> -i <add index to name>')
       sys.exit(2)
     for opt, arg in opts:
       if opt == '-h':
-         print('simple-download.py -s <start course id> -e <end course id> -n <single course id num> -p <only print>')
+         print('simple-download.py -s <start course id> -e <end course id> -n <single course id num> -p <only print> -f <forece update jsondata> -i <add index to name>')
          sys.exit()
       elif opt in ("-s", "--start"):
          start = arg
@@ -99,13 +100,15 @@ def get_argv(argv):
           p = True
       elif opt in ("-f", "--force"):
           force = True
+      elif opt in ("-i", "--index"):
+          index = True
     if start == 0 or end == 0:
         print('Error!, start course id or end course id incorrect')
         sys.exit()
-    return int(start), int(end), p, force
+    return int(start), int(end), p, force, index
 
 if __name__ == "__main__":
-    start, end, p, force = get_argv(sys.argv[1:])
+    start, end, p, force, add_index = get_argv(sys.argv[1:])
     #print(start, end, type(start))
     base_path = "/media/Entertainment/dengta"
     downloader = Downloader()
@@ -130,8 +133,12 @@ if __name__ == "__main__":
             #check file_path, if not exists , create.
             if not os.path.exists(file_path):
                 os.makedirs(file_path)
-            index = f"{data['sectionId']:0>2}" if len(seasonlist["sectionList"]) < 100 else f"{data['sectionId']:0>3}"
-            file_name = f"{file_path}/{index}.{data['title'].replace('/', '-').strip()}{'.mp4' if file_ext == '.m3u8' else file_ext}"
+
+            file_name = f"{file_path}/{data['title'].replace('/', '-').strip()}{'.mp4' if file_ext == '.m3u8' else file_ext}"
+            if add_index:
+                index = f"{data['sectionId']:0>2}" if len(seasonlist["sectionList"]) < 100 else f"{data['sectionId']:0>3}"
+                file_name = f"{file_path}/{index}.{data['title'].replace('/', '-').strip()}{'.mp4' if file_ext == '.m3u8' else file_ext}"
+
             print(file_name)
             if p:
                 continue
