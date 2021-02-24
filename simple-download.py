@@ -110,7 +110,7 @@ def get_argv(argv):
 if __name__ == "__main__":
     start, end, p, force, add_index = get_argv(sys.argv[1:])
     #print(start, end, type(start))
-    base_path = "/media/Entertainment/dengta"
+    base_path = "/media/sda2/enter/dengta"
     downloader = Downloader()
     for course_id in range(start, end + 1):
         json_data = downloader.get_json_data(course_id, force)
